@@ -25,7 +25,7 @@ export default function App() {
   async function loadAll() {
     await load('/status', setTemp)
     await load('/windows', setWindows)
-    await load('/computer', setComputer)
+    await load('/pcstatus', setComputer)
   }
 
   return (
@@ -54,7 +54,7 @@ export default function App() {
             <span className="panel-title">Статус компьютеров</span>
             <span className="panel-value">{computer}</span>
           </div>
-          <button className="panel-btn" disabled={loading} onClick={() => load('/computer', setComputer)}> Узнать статус </button>
+          <button className="panel-btn" disabled={loading} onClick={() => load('/pcstatus', setComputer)}> Узнать статус </button>
         </div>
 
       </div>
