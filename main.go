@@ -151,7 +151,11 @@ func getTemperature(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(map[string]int{"temperature": status.Temperature})
+	json.NewEncoder(w).Encode(struct {
+		Temperature int `json:"temperature"`
+	}{
+		Temperature: status.Temperature,
+	})
 }
 
 func getWet(w http.ResponseWriter, r *http.Request) {
@@ -161,7 +165,11 @@ func getWet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(map[string]int{"wet": status.Wet})
+	json.NewEncoder(w).Encode(struct {
+		Wet int `json:"wet"`
+	}{
+		Wet: status.Wet,
+	})
 }
 
 func getWindows(w http.ResponseWriter, r *http.Request) {
@@ -171,7 +179,11 @@ func getWindows(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(map[string]string{"windows": status.Windows})
+	json.NewEncoder(w).Encode(struct {
+		Windows string `json:"windows"`
+	}{
+		Windows: status.Windows,
+	})
 }
 
 func getPCStatus(w http.ResponseWriter, r *http.Request) {
@@ -185,6 +197,18 @@ func getPCStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	corsHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		http.DefaultServeMux.ServeHTTP(w, r)
+	})
 	var err error
 	cfg := Config{
 		Addr:        "localhost:6379",
@@ -210,7 +234,7 @@ func main() {
 	http.HandleFunc("/pcstatus", getPCStatus)
 
 	fmt.Println("HTTP-server starts on :8080...")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8080", corsHandler); err != nil {
 		panic(err)
 	}
 }
