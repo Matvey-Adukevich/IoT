@@ -32,7 +32,7 @@ func generateWet() (wet int) {
 func generateStatusPC() map[int]string {
 	m := make(map[int]string)
 	// num := getNumberStudents()
-	for i := 1; i <= 10; i++ {
+	for i := 1; i < 10; i++ {
 		flag := rand.Intn(2)
 		if flag == 0 {
 			m[i] = "off"
