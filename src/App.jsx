@@ -23,9 +23,9 @@ export default function App() {
   }
 
   async function loadAll() {
-    await load('/api/status', setTemp)
-    await load('/api/windows', setWindows)
-    await load('/api/computer', setComputer)
+    await load('/status', setTemp)
+    await load('/windows', setWindows)
+    await load('/computer', setComputer)
   }
 
   return (
@@ -38,7 +38,7 @@ export default function App() {
             <span className="panel-title">Температура</span>
             <span className="panel-value">{temp}</span>
           </div>
-          <button className="panel-btn" disabled={loading} onClick={() => load('/api/temperature', setTemp)}>Узнать температуру</button>
+          <button className="panel-btn" disabled={loading} onClick={() => load('/temperature', setTemp)}>Узнать температуру</button>
         </div>
 
         <div className="panel">
@@ -46,7 +46,7 @@ export default function App() {
             <span className="panel-title">Статус окон</span>
             <span className="panel-value">{windows}</span>
           </div>
-          <button className="panel-btn" disabled={loading} onClick={() => load('/api/windows', setWindows)}>Узнать статус</button>
+          <button className="panel-btn" disabled={loading} onClick={() => load('/windows', setWindows)}>Узнать статус</button>
         </div>
 
         <div className="panel">
@@ -54,7 +54,7 @@ export default function App() {
             <span className="panel-title">Статус компьютеров</span>
             <span className="panel-value">{computer}</span>
           </div>
-          <button className="panel-btn" disabled={loading} onClick={() => load('/api/computer', setComputer)}> Узнать статус </button>
+          <button className="panel-btn" disabled={loading} onClick={() => load('/computer', setComputer)}> Узнать статус </button>
         </div>
 
       </div>
@@ -74,7 +74,7 @@ export default function App() {
             <span className="panel-title">Логи</span>
             <span className="panel-value">{logs}</span>
           </div>
-          <button className="panel-btn" disabled={loading} onClick={() => load('/api/logs', setLogs)}>Получить логи</button>
+          <button className="panel-btn" disabled={loading} onClick={() => load('/logs', setLogs)}>Получить логи</button>
         </div>
 
       </div>
