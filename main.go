@@ -12,44 +12,23 @@ import (
 )
 
 type Status struct {
-	Windows        string         `json:"windows"`
-	Wet            int            `json:"wet"`
-	Temperature    int            `json:"temperature"`
-	NumberStudents int            `json:"numberStudents"`
-	PCs            map[int]string `json:"pcs"`
+	Windows     string         `json:"windows"`
+	Wet         int            `json:"wet"`
+	Temperature int            `json:"temperature"`
+	PCs         map[int]string `json:"pcs"`
 }
 
 type Config struct {
-	Addr        string        `yaml:"addr"`
-	Password    string        `yaml:"password"`
-	User        string        `yaml:"user"`
-	DB          int           `yaml:"db"`
-	MaxRetries  int           `yaml:"max_retries"`
-	DialTimeout time.Duration `yaml:"dial_timeout"`
-	Timeout     time.Duration `yaml:"timeout"`
+	Addr        string
+	Password    string
+	User        string
+	DB          int
+	MaxRetries  int
+	DialTimeout time.Duration
+	Timeout     time.Duration
 }
 
 var db *redis.Client
-
-func NewClient(ctx context.Context, cfg Config) (*redis.Client, error) {
-	client := redis.NewClient(&redis.Options{
-		Addr:         cfg.Addr,
-		Password:     cfg.Password,
-		DB:           cfg.DB,
-		Username:     cfg.User,
-		MaxRetries:   cfg.MaxRetries,
-		DialTimeout:  cfg.DialTimeout,
-		ReadTimeout:  cfg.Timeout,
-		WriteTimeout: cfg.Timeout,
-	})
-
-	if err := client.Ping(ctx).Err(); err != nil {
-		fmt.Printf("failed to connect to redis server: %s\n", err.Error())
-		return nil, err
-	}
-
-	return client, nil
-}
 
 func generateTemperature() int { return rand.Intn(35-17+1) + 17 }
 func generateWet() int         { return rand.Intn(100-20+1) + 20 }
@@ -66,7 +45,7 @@ func generateStatusPC() map[int]string {
 	return m
 }
 
-func getLastStatus(ctx context.Context) (*Status, error) {
+func getRoomStatus(ctx context.Context) (*Status, error) {
 	if db == nil {
 		return nil, fmt.Errorf("database not initialized")
 	}
@@ -105,7 +84,8 @@ func getStatus(w http.ResponseWriter, r *http.Request) {
 
 	jsonData, err := json.Marshal(temp)
 	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		fmt.Println("server error")
+		// http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -146,7 +126,7 @@ func getLogs(w http.ResponseWriter, r *http.Request) {
 
 func getTemperature(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	status, err := getLastStatus(r.Context())
+	status, err := getRoomStatus(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -160,7 +140,7 @@ func getTemperature(w http.ResponseWriter, r *http.Request) {
 
 func getWet(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	status, err := getLastStatus(r.Context())
+	status, err := getRoomStatus(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -174,7 +154,7 @@ func getWet(w http.ResponseWriter, r *http.Request) {
 
 func getWindows(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	status, err := getLastStatus(r.Context())
+	status, err := getRoomStatus(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -188,7 +168,7 @@ func getWindows(w http.ResponseWriter, r *http.Request) {
 
 func getPCStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	status, err := getLastStatus(r.Context())
+	status, err := getRoomStatus(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -199,30 +179,21 @@ func getPCStatus(w http.ResponseWriter, r *http.Request) {
 func main() {
 	corsHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
 		http.DefaultServeMux.ServeHTTP(w, r)
 	})
-	var err error
-	cfg := Config{
-		Addr:        "localhost:6379",
-		Password:    "1234",
-		User:        "",
-		DB:          0,
-		MaxRetries:  5,
-		DialTimeout: 10 * time.Second,
-		Timeout:     5 * time.Second,
-	}
+	db = redis.NewClient(&redis.Options{
+		Addr:         "localhost:6379",
+		Password:     "1234",
+		DB:           0,
+		MaxRetries:   5,
+		DialTimeout:  10 * time.Second,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+	})
 
-	db, err = NewClient(context.Background(), cfg)
-	if err != nil {
-		panic(err)
+	if err := db.Ping(context.Background()).Err(); err != nil {
+		fmt.Printf("failed to connect to redis server: %s\n", err.Error())
+		return
 	}
 	defer db.Close()
 
