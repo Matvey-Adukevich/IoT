@@ -93,35 +93,19 @@ export default function App() {
           </div>
           <button className="panel-btn" disabled={loading} onClick={loadAll}>Получить статус всего</button>
         </div>
-        <div className="panel" style={{ width: '504px' }}> 
+        <div className="panel panel--logs">
           <div className="panel-display">
             <span className="panel-title">Логи</span>
-            
-            <div style={{ 
-              background: '#000', 
-              color: '#aaa', 
-              fontFamily: 'monospace', 
-              fontSize: '11px', 
-              padding: '8px', 
-              borderRadius: '4px', 
-              width: '100%', 
-              maxHeight: '120px', 
-              overflowY: 'auto', 
-              boxSizing: 'border-box' 
-            }}>
-              {logs && logs.length > 0 ? (
-                logs.map((log, index) => (
-                  <div key={index} style={{ whiteSpace: 'nowrap', borderBottom: '1px solid #222', paddingBottom: '4px', textAlign: 'left' }}>
-                    {log}
-                  </div>
-                ))
-              ) : (
-                <span className="panel-value" style={{ color: 'inherit' }}>—</span>
-              )}
+            <div className="logs-box">
+              {logs?.length > 0
+                ? logs.map((log, i) => <div key={i} className="logs-line">{log}</div>)
+                : <span style={{ color: 'inherit' }}>—</span>}
             </div>
-
           </div>
-          <button className="panel-btn" disabled={loading} onClick={() => load('/logs', setLogs)}>Получить логи</button>
+          <button className="panel-btn" disabled={loading}
+            onClick={() => load('/logs', setLogs)}>
+            Получить логи
+          </button>
         </div>
 
       </div>
