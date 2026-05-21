@@ -85,7 +85,6 @@ func getStatus(w http.ResponseWriter, r *http.Request) {
 	jsonData, err := json.Marshal(temp)
 	if err != nil {
 		fmt.Println("server error")
-		// http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -179,6 +178,14 @@ func getPCStatus(w http.ResponseWriter, r *http.Request) {
 func main() {
 	corsHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		http.DefaultServeMux.ServeHTTP(w, r)
 	})
 	db = redis.NewClient(&redis.Options{
