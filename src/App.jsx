@@ -22,16 +22,9 @@ export default function App() {
   }
 
   async function loadAll() {
-    setLoading(true)
-    try {
-      const data = await fetch(BASE + '/status').then(r => r.json())
-      setTemp(data.temperature)
-      setWindows(data.windows)
-      setComputer(data.pcs)
-    } catch {
-      setTemp('Ошибка')
-    }
-    setLoading(false)
+    await load('/temperature', setTemp)
+    await load('/windows',     setWindows)
+    await load('/pcstatus',    setComputer)
   }
 
   return (
@@ -44,7 +37,7 @@ export default function App() {
             <span className="panel-title">Температура</span>
             <span className="panel-value">{temp ?? '—'}</span>
           </div>
-          <button className="panel-btn" disabled={loading}
+          <button type="button" className="panel-btn" disabled={loading}
             onClick={() => load('/temperature', setTemp)}>
             Узнать температуру
           </button>
@@ -55,7 +48,7 @@ export default function App() {
             <span className="panel-title">Статус окон</span>
             <span className="panel-value">{windows ?? '—'}</span>
           </div>
-          <button className="panel-btn" disabled={loading}
+          <button type="button" className="panel-btn" disabled={loading}
             onClick={() => load('/windows', setWindows)}>
             Узнать статус
           </button>
@@ -74,7 +67,7 @@ export default function App() {
                 : '—'}
             </div>
           </div>
-          <button className="panel-btn" disabled={loading}
+          <button type="button" className="panel-btn" disabled={loading}
             onClick={() => load('/pcstatus', setComputer)}>
             Узнать статус
           </button>
@@ -89,7 +82,7 @@ export default function App() {
             <span className="panel-title">Обновить всё сразу</span>
             {loading && <span className="panel-loading">Загрузка...</span>}
           </div>
-          <button className="panel-btn" disabled={loading} onClick={loadAll}>
+          <button type="button" className="panel-btn" disabled={loading} onClick={loadAll}>
             Получить статус всего
           </button>
         </div>
@@ -103,7 +96,7 @@ export default function App() {
                 : '—'}
             </div>
           </div>
-          <button className="panel-btn" disabled={loading}
+          <button type="button" className="panel-btn" disabled={loading}
             onClick={() => load('/logs', setLogs)}>
             Получить логи
           </button>
